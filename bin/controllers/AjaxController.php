@@ -14,6 +14,7 @@ use bin\services\Upload;
 
 /**
 * @pattern Command, VMC
+* All action is in private and in uppercase. The whitelist are checking the auth actions
 */
 final class AjaxController extends Controller implements APIInterface {
 
@@ -42,24 +43,27 @@ final class AjaxController extends Controller implements APIInterface {
           '_DELETENODE',
           '_CREATEFOLDER'
         ];
-        return in_array($funct, $functWhiteList) ? $this->$funct($this->request) : json_encode(['success' => false]);
+        return in_array($funct, $functWhiteList) ? $this->$funct() : json_encode(['success' => false]);
     }
 
-    private function _SENDCONTACT (\stdClass $request)
+    private function _SENDCONTACT ()
     : string
     {
-        return $request->text;
+        return $this->request->text;
     }
 
-    private function _LOGIN (\stdClass $request)
+    private function _LOGIN ()
     : string
     {
-        $user = new User();
-
-        return json_encode($user->login((string) $request->login, (string) $request->password));
+        return json_encode(
+            (new User())->login(
+                (string) $this->request->login,
+                (string) $this->request->password
+            )
+        );
     }
 
-    private function _GETCART (\stdClass $request)
+    private function _GETCART ()
     : string
     {
         $cart = new Cart($this->mysql);
@@ -73,47 +77,49 @@ final class AjaxController extends Controller implements APIInterface {
         return json_encode($node->getNodes());
     }
 
-    private function _UPLOAD (\stdClass $request)
+    private function _UPLOAD ()
     : string
     {
         return json_encode(
-            Upload::checkFile($request->file, $request->filename)->moveFile($request->pNodeId)
+            Upload::checkFile(
+                $this->request->file,
+                $this->request->filename
+            )->moveFile($this->request->pNodeId)
         );
     }
 
-    private function _CREATEFOLDER (\stdClass $request)
+    private function _CREATEFOLDER ()
     : string
     {
-        $node = new Node();
-        return json_encode($node->setNode($request->nodeId, $request->name, true));
+        return json_encode(
+            (new Node())->setNode($this->request->nodeId, $this->request->name, true)
+        );
     }
 
-    private function _DELETENODE (\stdClass $request)
+    private function _DELETENODE ()
     : string
     {
-        $node = new Node();
-        return json_encode($node->unsetNode($request->nodeId));
+        return json_encode((new Node())->unsetNode($this->request->nodeId));
     }
 
     private function _CHECKUSER ()
     : string
     {
-        $user = new User();
-        return json_encode($user->checkUser());
+        return json_encode((new User())->checkUser());
     }
 
-    private function _REGISTER (\stdClass $request)
+    private function _REGISTER ()
     : string
     {
-        $user = new User();
-        $createUser = $user->register((string) $request->login, (string) $request->password);
+        $createUser = (new User())->register(
+            (string) $this->request->login, (string) $this->request->password
+        );
         return $createUser['success'] ? json_encode($createUser) : "Cet utilisateur éxiste déjà";
     }
 
     private function _DISCONNECT ()
     : string
     {
-        $user = new User();
-        return json_encode($user->disconnect());
+        return json_encode((new User())->disconnect());
     }
 }

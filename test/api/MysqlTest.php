@@ -10,6 +10,7 @@ require_once __DIR__.'/../config.php';
 
 
 final class MysqlTest extends TestCase {
+    
     public function testInsertEveryValue()
     : void
     {

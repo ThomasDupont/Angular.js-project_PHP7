@@ -25,7 +25,7 @@ final class AjaxController extends Controller implements APIInterface {
 
     /**
     * MUST be implemented
-    *
+    * execute the action
     */
     public function execute ()
     : string
